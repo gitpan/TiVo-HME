@@ -4,12 +4,12 @@ use 5.008;
 use strict;
 use warnings;
 
+our $VERSION = '1.1';
+
 use constant {
 	MAX_CHUNK_SIZE => 65530,
 	TERMINATE_CHUNK => pack('vv', 0, 0),
 };
-
-our $VERSION = '1.0';
 
 sub new {
 	my($class, $io) = @_;
@@ -27,16 +27,18 @@ sub read_chunk_header {
 	my $io = $self->{io};
 
 	my $len = $self->get_length;
+    return if (!$len);
 
 	# suck entire chunk off wire
 	my $count = $io->sysread($buf, $len);
+    return if (!$count || $count != $len);
 
 	if ($len && $count) {
 		$self->{current_chunk} = [ split //, $buf ];
 		return $self->read_vint;
 	}
 
-	0;
+	undef;
 }
 
 sub get_length {
@@ -46,8 +48,11 @@ sub get_length {
 	my($hi, $lo);
 
 	# read in the 2 length bytes
-	$io->sysread($hi, 1);
-	$io->sysread($lo, 1);
+	my $ret = $io->sysread($hi, 1);
+    return if !$ret;
+
+	$ret = $io->sysread($lo, 1);
+    return if !$ret;
 
 	(ord($hi) << 8) + ord($lo);
 }
@@ -232,3 +237,47 @@ sub do {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+TiVo::HME::IO - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use TiVo::HME::IO;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for TiVo::HME::IO, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+
+=head1 SEE ALSO
+
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
+
+If you have a mailing list set up for your module, mention it here.
+
+If you have a web site set up for your module, mention it here.
+
+=head1 AUTHOR
+
+Mark Ethan Trostler, E<lt>mark@zzo.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2005 by Mark Ethan Trostler
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
+=cut

@@ -1,6 +1,0 @@
-Revision history for Perl extension HME::Hail.
-
-1.0  Mon Feb 14 11:41:51 2005
-	- original version; created by h2xs 1.22 with options
-		-n HME::Hail -v 1.0 -X
-

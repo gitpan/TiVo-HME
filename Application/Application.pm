@@ -1,5 +1,11 @@
 package TiVo::HME::Application;
 
+use 5.008;
+use strict;
+use warnings;
+
+our $VERSION = '1.1';
+
 # Just use these there so subclass don't have to
 use TiVo::HME::View;
 use TiVo::HME::Resource;
@@ -14,11 +20,9 @@ our $T_CONST = $pkg . 'CONST';
 # You'll thank me for this I promise...
 require Exporter;
 our @ISA = qw(Exporter);
-@EXPORT = qw($T_RESOURCE $T_VIEW $T_CONST);
+our @EXPORT = qw($T_RESOURCE $T_VIEW $T_CONST);
 
 use IO::Select;
-
-our $VERSION = '1.0';
 
 use constant {
 
@@ -112,6 +116,7 @@ sub read_events {
 	while(1) {
 		my @ready = $s->can_read;
 		my($op) = $io->read_chunk_header;
+        return if (!defined $op);
 		if ($op == $T_CONST->EVT_DEVICE_INFO) {
 			# Read in device info structure
 			my $id = $io->read_vint;
@@ -166,7 +171,6 @@ sub handle_event {
 1;
 
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 

@@ -1,5 +1,11 @@
 package TiVo::HME::Server;
 
+use 5.008;
+use strict;
+use warnings;
+
+our $VERSION = '1.1';
+
 use TiVo::HME::IO;
 use TiVo::HME::Context;
 
@@ -25,7 +31,7 @@ sub new {
 		ReuseAddr => 1,
 		ReusePort => 1,
 	);
-	#print "Please contact me at: <URL:", $d->url, ">\n";
+	#print STDERR "\nPlease contact me at: <URL:", $d->url, ">\n";
 
 	my $self = { server => $d };
 	bless $self, $class;
@@ -90,14 +96,23 @@ sub start {
 				my $app_name;
 				($app_name .= $r->url->path) =~ s#/##g;
 				$app_name = $app_name . '.pm';
+
 				eval { require "$app_name" };
-				die "$@" if ($@);
+                if ($@) {
+                    print STDERR "\nI don't know where to find: $app_name!\n";
+                    return;
+                }
 
 				my $obj_name;
 				($obj_name = $app_name) =~ s/\.pm$//;
 
 				# Sorta assuming app object is a subclass of
 				#	TiVo::HME::Application
+                unless ($obj_name->isa('TiVo::HME::Application')) {
+                    print STDERR
+                        "$obj_name not a subclass of TiVo::HME::Application!\n";
+                    return;
+                }
 				my $app = $obj_name->new;
 				$app->set_context($context);
 				$app->init($context);
@@ -120,3 +135,48 @@ sub generate_id {
 }
 
 1;
+
+__END__
+# Below is stub documentation for your module. You'd better edit it!
+
+=head1 NAME
+
+TiVo::HME::Server - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use TiVo::HME::Server;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for TiVo::HME::Server, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+
+=head1 SEE ALSO
+
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
+
+If you have a mailing list set up for your module, mention it here.
+
+If you have a web site set up for your module, mention it here.
+
+=head1 AUTHOR
+
+Mark Ethan Trostler, E<lt>mark@zzo.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2005 by Mark Ethan Trostler
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
+=cut

@@ -1,5 +1,11 @@
 package TiVo::HME::Resource;
 
+use 5.008;
+use strict;
+use warnings;
+
+our $VERSION = '1.1';
+
 use Digest::MD5 qw(md5_hex);
 
 # stash of all current resources
@@ -9,9 +15,7 @@ our @_resources;
 # package globals
 our $CONTEXT;
 our $IO;
-our %DEFAULT_RESOURCES;
-
-our $VERSION = '1.0';
+our @DEFAULT_RESOURCES;
 
 use constant {
 	FONT_DEFAULT_ID => 10,
@@ -63,7 +67,7 @@ sub _make {
 sub color {
 	my($class, $r, $g, $b, $alpha) = @_;
 
-	$key = $r . $g . $b . $alpha;
+	my $key = $r . $g . $b . $alpha;
 	return $_resources{$key} if $_resources{key};
 
 	# create color resource
@@ -113,7 +117,7 @@ sub text {
 }
 
 sub ttf_file {
-	my($self, $fname) = @_;
+	my($class, $fname) = @_;
 
 	# TODO we should hash the file to see if we already got it...
 	_binary_file($class, CMD_RSRC_ADD_TTF, $fname);
@@ -152,7 +156,7 @@ sub _binary_file {
 	my @data = split //, $d;
 
 	# create a new ID
-	$id = get_id;
+	my $id = get_id;
 
 	$IO->do('vvR', $opcode, $id, [map(ord, @data)]);
 
@@ -167,7 +171,7 @@ sub stream {
 	return $_resources{$key} if $_resources{key};
 
 	# create a new ID
-	$id = get_id;
+	my $id = get_id;
 	$IO->do('vvssb', CMD_RSRC_ADD_STREAM, $id, $url, $content_type, $play);
 	_make($class, 'stream', $id, $key);
 }
@@ -182,7 +186,7 @@ sub animation {
 	return $_resources{$key} if $_resources{key};
 
 	# create a new ID
-	$id = get_id;
+	my $id = get_id;
 	$IO->do('vvvf', CMD_RSRC_ADD_ANIM, $id, $duration, $ease);
 	_make($class, 'animation', $id, $key);
 }
@@ -207,7 +211,7 @@ sub set_speed {
 sub send_event {
 	my($class, $target_resource, $animation, $data) = @_;
 
-	$aid = ($animation ? $animation->{id} : TiVo::HME::CONST->ID_NULL);
+	my $aid = ($animation ? $animation->{id} : TiVo::HME::CONST->ID_NULL);
 
 	$IO->do('vvvR', CMD_RSRC_SEND_EVENT, $target_resource->id, 
 		$aid, $data);
@@ -246,3 +250,48 @@ sub DESTROY {
 }
 
 1;
+
+__END__
+# Below is stub documentation for your module. You'd better edit it!
+
+=head1 NAME
+
+TiVo::HME::Resource - Perl extension for blah blah blah
+
+=head1 SYNOPSIS
+
+  use TiVo::HME::Resource;
+  blah blah blah
+
+=head1 DESCRIPTION
+
+Stub documentation for TiVo::HME::Resource, created by h2xs. It looks like the
+author of the extension was negligent enough to leave the stub
+unedited.
+
+Blah blah blah.
+
+
+=head1 SEE ALSO
+
+Mention other useful documentation such as the documentation of
+related modules or operating system documentation (such as man pages
+in UNIX), or any relevant external documentation such as RFCs or
+standards.
+
+If you have a mailing list set up for your module, mention it here.
+
+If you have a web site set up for your module, mention it here.
+
+=head1 AUTHOR
+
+Mark Ethan Trostler, E<lt>mark@zzo.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2005 by Mark Ethan Trostler
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
+=cut
