@@ -225,7 +225,7 @@ sub close {
 sub remove {
 	my($self) = @_;
 
-	if ($self->{id}) {
+	if ($self->{id} && $self->{io}) {
 		$IO->do('vv', CMD_RSRC_REMOVE, $self->{id});
 		undef $self->{id};
 	}
@@ -256,32 +256,107 @@ __END__
 
 =head1 NAME
 
-TiVo::HME::Resource - Perl extension for blah blah blah
+TiVo::HME::Resource - Perl encapsulation of a TiVo HME resource.
 
 =head1 SYNOPSIS
 
-  use TiVo::HME::Resource;
-  blah blah blah
+  use TiVo::HME::Application;
+  @ISA = qw(TiVo::HME::Applicaton);
+
+    # create a buncha resources
+
+    # Color
+    # r,g,b,alpha = 0 ... 255
+    my $color = $T_RESOURCE->color($red, $green, $blue, $alpha);
+
+    # Font
+    my $font = $T_RESOURCE->font([ 'system' | 'default' ], $point_size, STYLE);
+    # point size is a float
+    # STYLE is one of:
+    # $T_CONST->FONT_PLAIN      
+    # $T_CONST->FONT_BOLD       
+    # $T_CONST->FONT_ITALIC     
+    # $T_CONST->FONT_BOLDITALIC 
+
+    # True Type Font (you need a file containing it)
+    my $ttf = $T_RESOURCE->ttf_file($ttf_file_name);
+
+    # Text
+    my $text = $T_RESOURCE->text($font, $color, $string);
+    # $font (TTF or Font) & $color are created as above
+    # $string is yer string
+
+    # Image (jpeg, mpeg, or png)
+    my $image = $T_RESOURCE->image_file($path_to_image_file);
+
+    # Sound
+    my $sound = $T_RESOURCE->sound_file($path_to_sound_file);
+
+    # Stream
+    my $sound = $T_RESOURCE->stream($url, $content_type, $play);
+    # $url points to stream resouce 
+    # $content_type is a hint to TiVo so it knows what the stream is
+    # $play, 1 = play, 0 = pause
+
+    # Animation
+    my $anim = $T_RESOURCE->animation($duration, $ease);
+    # $duration is in miliseconds
+    # $ease = -1. <= $ease <= 1.  0 = linear
+
+    # Set active
+    $resource->set_active ( [ 0 | 1 ] );
+
+    # Set position
+    $resource->position($pos);
+    # $pos = milliseconds into resource
+
+    # Set speed
+    $resource->set_speed( 0 .. 1.);
+    # 0 = paused
+    # 1 = play at normal speed
+
+    # Make key event
+    my $event = $T_RESOURCE->make_key_event(1, $action, $code, $rawcode);
+    # just put the '1' there for now...
+    # $action can be anything BUT you can use:
+    # $T_CONST->KEY_PRESS       
+    # $T_CONST->KEY_REPEAT      
+    # $T_CONST->KEY_RELEASE     
+
+    # $code - see all the key codes defined in TiVo::HME::CONST
+    # $rawcode can be anything
+
+    # Send key event
+    $T_RESOURCE->set_event(1, $animation, $event);
+    # just put the '1' there for now...
+    # $animation is an (optional) animation resource (0 to ignore)
+    # $event is from 'make_key_event'
+
+    # Close
+    $resource->close;
+
+    # Remove resource from TiVo
+    $resource->remove;
+
+
+
+
+
+
+
+
+
+    my $image = $T_RESOURCE->image_file('tivo.jpg');
 
 =head1 DESCRIPTION
 
-Stub documentation for TiVo::HME::Resource, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
+You create & manipulate resources - eventually assigning them to
+Views to be displayed/played by your TiVo.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://tivohme.sourceforge.net
+TiVo::HME::Application
 
 =head1 AUTHOR
 

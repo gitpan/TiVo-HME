@@ -32,32 +32,31 @@ __END__
 
 =head1 NAME
 
-TiVo::HME::Context - Perl extension for blah blah blah
+TiVo::HME::Context - Context object containing some useful values
 
 =head1 SYNOPSIS
 
   use TiVo::HME::Context;
-  blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for TiVo::HME::Context, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+This object is just a bless'ed hash containing some important
+values:
+    'io' -> I/O stream to client (TiVo)
+    'peer' -> packed sockaddr address of peer (perldoc -f getpeername)
+    'cookie' -> ID of persistent data from client (TiVo)
+    'request' -> HTTP::Request object
 
-Blah blah blah.
+    This object is constructed by TiVo::HME::Socket as is passed to
+    your application as a parameter to your 'init' function.
+    It's also available to your app by calling $self->get_context
 
+    You prolly do NOT want to mess w/the IO within the context.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://tivohme.sourceforge.net
+TiVo::HME::Application
 
 =head1 AUTHOR
 

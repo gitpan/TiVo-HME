@@ -13,6 +13,7 @@ use Digest::MD5 qw(md5_hex);
 use CGI::Cookie;
 use HTTP::Daemon;
 use HTTP::Status;
+use POSIX ':sys_wait_h';
 
 use constant DEFAULT_PORT => 7288;
 use constant ACCEPTOR_NAME => 'Acceptor';
@@ -24,6 +25,16 @@ use constant VERSION_STRING => VERSION_MAJOR . '.' . VERSION_MINOR;
 use constant MIME_TYPE => 'application/x-hme';
 use constant TIVO_DURATION => 'X-TiVo-Accurate-Duration';
 
+sub REAPER {
+    my $child;
+
+    1 while (($child = waitpid(-1, WNOHANG)) > 0);
+    $SIG{CHLD} = \&REAPER;
+
+}
+
+$SIG{PIPE} = 'IGNORE';
+
 sub new {
 	my ($class) = shift;
 	my $d = HTTP::Daemon->new(
@@ -33,6 +44,8 @@ sub new {
 	);
 	#print STDERR "\nPlease contact me at: <URL:", $d->url, ">\n";
 
+    $SIG{CHLD} = \&REAPER;
+
 	my $self = { server => $d };
 	bless $self, $class;
 }
@@ -40,6 +53,12 @@ sub new {
 sub start {
 	my ($self) = shift;
 	while (my($c, $peer) = $self->{server}->accept) {
+
+        # fork it off
+        my $pid = fork;
+        die "Cannot fork\n" unless defined $pid;
+        do { close $c; next; } if $pid;
+
 		while (my $r = $c->get_request) {
 			$c->autoflush;
 
@@ -92,6 +111,8 @@ sub start {
 					peer => $peer,
 				);
 
+                print STDERR ref $peer;
+
 				# Create the App
 				my $app_name;
 				($app_name .= $r->url->path) =~ s#/##g;
@@ -111,16 +132,18 @@ sub start {
                 unless ($obj_name->isa('TiVo::HME::Application')) {
                     print STDERR
                         "$obj_name not a subclass of TiVo::HME::Application!\n";
-                    return;
+                    last;
                 }
 				my $app = $obj_name->new;
 				$app->set_context($context);
 				$app->init($context);
+
 				$app->read_events;
 			}
 			else {
 				$c->send_error(RC_FORBIDDEN)
 			}
+            print STDERR "REQUEST DONE!!\n";
 		}
 		$c->close;
 		undef($c);
@@ -141,32 +164,26 @@ __END__
 
 =head1 NAME
 
-TiVo::HME::Server - Perl extension for blah blah blah
+TiVo::HME::Server - HTTP server & dispatcher for TiVo::HME
 
 =head1 SYNOPSIS
 
   use TiVo::HME::Server;
-  blah blah blah
+  use lib qw(...);  # path to your TiVo apps
+  TiVo::HME::Server->start;
 
 =head1 DESCRIPTION
 
-Stub documentation for TiVo::HME::Server, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
+Handle connections from TiVos by finding your app & starting it.
+A URL like http://localhost/myapp will cause this to load 'myapp.pm'
+& start it by calling its 'init' method passing in a reference to
+itself & the context.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+http://tivohme.sourceforge.net
+TiVo::HME::Application
+TiVo::HME::HME.pm
 
 =head1 AUTHOR
 

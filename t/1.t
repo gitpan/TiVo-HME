@@ -8,7 +8,7 @@
 use Test::More tests => 1;
 BEGIN { use_ok('TiVo::HME') };
 
-#my $server = TiVo::HME->start( [ qw(examples ../examples) ] );
+my $server = TiVo::HME->start( [ qw(examples ../examples) ] );
 
 #########################
 

@@ -1,16 +1,18 @@
-TiVo/HME/Context version 0.01
+TiVo/HME/Context version 1.x
 =============================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+This object is just a bless'ed hash containing some important
+values:
+    'io' -> I/O stream to client (TiVo)
+    'peer' -> packed sockaddr address of peer (perldoc -f getpeername)
+    'cookie' -> ID of persistent data from client (TiVo)
+    'request' -> HTTP::Request object
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+    This object is constructed by TiVo::HME::Socket as is passed to
+    your application as a parameter to your 'init' function.
+    It's also available to your app by calling $self->get_context
+
+    You prolly do NOT want to mess w/the IO within the context.
 
 INSTALLATION
 
@@ -23,15 +25,13 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module requires these other modules and libraries:
-
-  blah blah blah
+    zilch
 
 COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) 2005 Mark Trostler
+Copyright (C) 2005 Mark Ethan Trostler
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

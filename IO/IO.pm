@@ -242,32 +242,23 @@ __END__
 
 =head1 NAME
 
-TiVo::HME::IO - Perl extension for blah blah blah
+TiVo::HME::IO - Perl extension for 'chunked' encoding to talk to your TiVo.
 
 =head1 SYNOPSIS
 
   use TiVo::HME::IO;
-  blah blah blah
 
 =head1 DESCRIPTION
 
-Stub documentation for TiVo::HME::IO, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
+There's pretty much nothing in here for you to use.  
+TiVo::HME::Application handles passing data to & from this module, 
+which talks to your TiVo.  Nothing to see here... move along.
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+TiVo::HME
+TiVo::HME::Application
+http://tivohme.sourceforge.net
 
 =head1 AUTHOR
 

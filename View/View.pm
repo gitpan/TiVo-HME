@@ -111,7 +111,7 @@ sub painting {
 sub remove {
 	my($self, $animation) = @_;
 
-	if ($self->{id}) {
+	if ($self->{id} && $self->{io}) {
 		my $aid = ($animation ? $animation->{id} : ID_NULL);
 		$self->{io}->do('vvv', CMD_VIEW_REMOVE, $self->{id}, $aid);
 		undef $self->{id};
@@ -139,32 +139,61 @@ __END__
 
 =head1 NAME
 
-TiVo::HME::View - Perl extension for blah blah blah
+TiVo::HME::View - Perl encapsulation of TiVo HME Views.
 
 =head1 SYNOPSIS
 
-  use TiVo::HME::View;
-  blah blah blah
+  use TiVo::HME::Application;
+  @ISA = qw(TiVo::HME::Application);
+
+  my $new_view = $T_VIEW->new(
+        x => $x,            # Minimum x values
+        y => $y,            # Minimum y values
+        width => $width,    # view width
+        height => $height,  # view height
+        visiable => 1,      # make visible
+        );
+
+    $new_view->add;         # actually add view to the TiVo
+
+    # manipulate view
+    $new_view->visible( [ 0 | 1 ]);                 # visible or not
+    $new_view->bounds( $x, $y, $width, $height);    # changes view bounds
+    $new_view->scale( $xscale, $yscale);            # x,y >= 0 (floats)
+    $new_view->translate( $tx, $ty);                # translate view coords
+    $new_view->transparency($tp);                   # $tp = 0 .. 1 (0 is opaque)
+    $new_view->painting( [ 0 | 1 ]);                # set painting
+    $new_view->remove;                              # take away view
+
+    # All of the above functions (except 'painting') take an optional
+    #   'animation' parameter to animate the manipulation.
+    #   See TiVo::HME::Resource to create an animation
+
+    # Assocaiate a Resource with this View
+    $new_view->set_resource($resource, < flags >);
+
+    # See TiVo::HME::Resource to create a Resource
+    # flags is a |'ed value of:
+    #
+    # $T_CONST->HALIGN_LEFT     
+    # $T_CONST->HALIGN_CENTER   
+    # $T_CONST->HALIGN_RIGHT    
+    # $T_CONST->VALIGN_TOP      
+    # $T_CONST->VALIGN_CENTER   
+    # $T_CONST->VALIGN_BOTTOM   
+    # $T_CONST->TEXT_WRAP       
+    # $T_CONST->IMAGE_HFIT      
+    # $T_CONST->IMAGE_VFIT      
+    # $T_CONST->IMAGE_BESTFIT   
 
 =head1 DESCRIPTION
 
-Stub documentation for TiVo::HME::View, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
-
+Encapsulate a TiVo HME View
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+TiVo::HME::Application
+http://tivohme.sourceforge.net
 
 =head1 AUTHOR
 

@@ -1,16 +1,13 @@
-TiVo/HME/Server version 0.01
+TiVo/HME/Server version 1.x
 ============================
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
-
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+Starts up a webserver & awaits connctions from a TiVo.
+The URL is stripped & the path is taken as the class name.
+SO a URL like http://localhost/myapp causes TiVo::HME::Server 
+to load up 'myapp.pm' which is expected to be a subclass of
+TiVo::HME::Application.  
+Make sure you 'use lib qw(...)' or similar so it can find your app!
+This is automatically installed via the TiVo::HME distribution.
 
 INSTALLATION
 
@@ -25,13 +22,17 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+    HTTP::Daemon;
+    HTTP::Status;
+    CGI::Cookie;
+    Digest::MD5
+    POSIX
 
 COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) 2005 Mark Trostler
+Copyright (C) 2005 Mark Ethan Trostler
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

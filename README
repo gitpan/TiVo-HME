@@ -1,38 +1,39 @@
-TiVo/HME version 0.01
-=====================
+Pure Perl HME SDK
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Before doing ANYTHING check out http://tivohme.sourceforge.net/ so
+we're all on the same page.  Download the SDK.  Untar it.  Get ready.
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+To run these examples you either need to run the Simulator that comes
+with the SDK from sourceforge or have a real-live updated Series 2 TiVo.
 
-INSTALLATION
+The Sourceforge tells ya how to set up your TiVo so listen to them.
+I'll just talk about the Simulator.  Run it like so:
 
-To install this module type the following:
+% java -cp <path/to/>/simulator.jar com.tivo.hme.sim.Simulator
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+Now run a perl example:
 
-DEPENDENCIES
+use TiVo::HME;
 
-This module requires these other modules and libraries:
+my $path_to_my_tivo_hme_app = '/home/mark/perl_stuff/TiVo/HME/examples';
+TiVo::HME->start( [ $path_to_my_tivo_hme_app ] );
 
-  blah blah blah
+Now go to Simulator & in the URL box type:
 
-COPYRIGHT AND LICENCE
+http://localhost/animate/
 
-Put the correct copyright and licence information here.
+& hit return - if you see boxes moving around YOU DID IT!!
 
-Copyright (C) 2005 Mark Trostler
+If not...  welp... something is horribly, horribly wrong.
+Make sure you didn't see any error messages when starting the simulator
+or 'start.pl'.
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+Sorry that's all I got for ya - perldoc TiVo::HME::Application for details
+about how to write HME apps.
+
+Lemmie know how it goes!!
+
+mark@zzo.com
+
+
 

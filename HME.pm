@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use vars qw(@INC);
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 use TiVo::HME::Server;
 
@@ -40,7 +40,7 @@ the server - it will NOT return.  Then point your simulator at
 http://localhost/<app name> (assuming you're running the simulator and
 this on the same box).
 This basically just gets the party started - perldoc TiVo::HME::Application
-for how to actually write an app.
+for how to actually write an HME app.
 
 =head1 SEE ALSO
 
