@@ -4,7 +4,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 use TiVo::HME::IO;
 use TiVo::HME::Context;
@@ -36,125 +36,124 @@ sub REAPER {
 $SIG{PIPE} = 'IGNORE';
 
 sub new {
-	my ($class) = shift;
-	my $d = HTTP::Daemon->new(
-		LocalPort => DEFAULT_PORT,
-		ReuseAddr => 1,
-		ReusePort => 1,
-	);
-	#print STDERR "\nPlease contact me at: <URL:", $d->url, ">\n";
+        my ($class) = shift;
+        my $d = HTTP::Daemon->new(
+                LocalPort => DEFAULT_PORT,
+                ReuseAddr => 1,
+        );
+        #print STDERR "\nPlease contact me at: <URL:", $d->url, ">\n";
 
     $SIG{CHLD} = \&REAPER;
 
-	my $self = { server => $d };
-	bless $self, $class;
+        my $self = { server => $d };
+        bless $self, $class;
 }
 
 sub start {
-	my ($self) = shift;
-	while (my($c, $peer) = $self->{server}->accept) {
+        my ($self) = shift;
+        while (my($c, $peer) = $self->{server}->accept) {
 
         # fork it off
         my $pid = fork;
         die "Cannot fork\n" unless defined $pid;
         do { close $c; next; } if $pid;
 
-		while (my $r = $c->get_request) {
-			$c->autoflush;
+                while (my $r = $c->get_request) {
+                        $c->autoflush;
 
-			if ($r->method eq 'GET') {
-				# do something w/cookie...
-				my %cookies = CGI::Cookie->parse($r->header('Cookie'));
-				my $id;
+                        if ($r->method eq 'GET') {
+                                # do something w/cookie...
+                                my %cookies = CGI::Cookie->parse($r->header('Cookie'));
+                                my $id;
 
-				$c->send_status_line;
-				$c->print('Content-type: ' . MIME_TYPE);
-				$c->send_crlf;
-				# drop in a cookie
-				unless (%cookies) {
-					$id = generate_id();
-					my $cookie = new CGI::Cookie(-name => 'id',
-											-value => $id,
-											-expires => '+20Y',
-											-path => '/');
-					$c->print("Set-Cookie: $cookie");
-					$c->send_crlf;
-				} else {
-					$id = (keys %cookies)[0];
-					$id = $cookies{$id}->value;
-				}
+                                $c->send_status_line;
+                                $c->print('Content-type: ' . MIME_TYPE);
+                                $c->send_crlf;
+                                # drop in a cookie
+                                unless (%cookies) {
+                                        $id = generate_id();
+                                        my $cookie = new CGI::Cookie(-name => 'id',
+                                                                                        -value => $id,
+                                                                                        -expires => '+20Y',
+                                                                                        -path => '/');
+                                        $c->print("Set-Cookie: $cookie");
+                                        $c->send_crlf;
+                                } else {
+                                        $id = (keys %cookies)[0];
+                                        $id = $cookies{$id}->value;
+                                }
 
-				#end header
-				$c->send_crlf;
+                                #end header
+                                $c->send_crlf;
 
-				# dump SBTV & VERSION
-				$c->print(pack('N', MAGIC));
-				$c->print(pack('N', 0x0, 0x0, VERSION_MAJOR, VERSION_MINOR));
+                                # dump SBTV & VERSION
+                                $c->print(pack('N', MAGIC));
+                                $c->print(pack('N', 0x0, 0x0, VERSION_MAJOR, VERSION_MINOR));
 
-				my($magic, $rv);
+                                my($magic, $rv);
 
-				$c->sysread($magic, 4);
-				die "Bad Magic!\n" if ($magic ne 'SBTV');
+                                $c->sysread($magic, 4);
+                                die "Bad Magic!\n" if ($magic ne 'SBTV');
 
-				$c->sysread($rv, 4);
-				$rv = unpack('N', $rv);
-				die "Bad Version!\n" if ($rv != VERSION);
+                                $c->sysread($rv, 4);
+                                $rv = unpack('N', $rv);
+                                die "Bad Version!\n" if ($rv != VERSION);
 
-				# New chunked encoded IO stream
-				my $io = TiVo::HME::IO->new($c);
+                                # New chunked encoded IO stream
+                                my $io = TiVo::HME::IO->new($c);
 
-				# Create a new App Context
-				my $context = TiVo::HME::Context->new(
-					cookie => $id,
-					connexion => $io,
-					request => $r,
-					peer => $peer,
-				);
+                                # Create a new App Context
+                                my $context = TiVo::HME::Context->new(
+                                        cookie => $id,
+                                        connexion => $io,
+                                        request => $r,
+                                        peer => $peer,
+                                );
 
                 print STDERR ref $peer;
 
-				# Create the App
-				my $app_name;
-				($app_name .= $r->url->path) =~ s#/##g;
-				$app_name = $app_name . '.pm';
+                                # Create the App
+                                my $app_name;
+                                ($app_name .= $r->url->path) =~ s#/##g;
+                                $app_name = $app_name . '.pm';
 
-				eval { require "$app_name" };
+                                eval { require "$app_name" };
                 if ($@) {
                     print STDERR "\nI don't know where to find: $app_name!\n";
                     return;
                 }
 
-				my $obj_name;
-				($obj_name = $app_name) =~ s/\.pm$//;
+                                my $obj_name;
+                                ($obj_name = $app_name) =~ s/\.pm$//;
 
-				# Sorta assuming app object is a subclass of
-				#	TiVo::HME::Application
+                                # Sorta assuming app object is a subclass of
+                                #        TiVo::HME::Application
                 unless ($obj_name->isa('TiVo::HME::Application')) {
                     print STDERR
                         "$obj_name not a subclass of TiVo::HME::Application!\n";
                     last;
                 }
-				my $app = $obj_name->new;
-				$app->set_context($context);
-				$app->init($context);
+                                my $app = $obj_name->new;
+                                $app->set_context($context);
+                                $app->init($context);
 
-				$app->read_events;
-			}
-			else {
-				$c->send_error(RC_FORBIDDEN)
-			}
+                                $app->read_events;
+                        }
+                        else {
+                                $c->send_error(RC_FORBIDDEN)
+                        }
             print STDERR "REQUEST DONE!!\n";
-		}
-		$c->close;
-		undef($c);
-	}
+                }
+                $c->close;
+                undef($c);
+        }
 }
 
 # ** Note ** This is intended to be unique, not unguessable. 
 sub generate_id {
-	my $id = md5_hex(md5_hex(time.{}.rand().$$)); 
-	$id =~ tr|+/=|-_.|;     # make non-word characters URL friendly 
-	$id;
+        my $id = md5_hex(md5_hex(time.{}.rand().$$)); 
+        $id =~ tr|+/=|-_.|;     # make non-word characters URL friendly 
+        $id;
 }
 
 1;

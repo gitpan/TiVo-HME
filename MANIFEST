@@ -53,3 +53,4 @@ examples/myloop.mpg
 examples/time.pm
 examples/tivo.png
 examples/video_background.pm
+META.yml                                 Module meta-data (added by MakeMaker)

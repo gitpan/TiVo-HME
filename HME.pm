@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use vars qw(@INC);
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 use TiVo::HME::Server;
 
